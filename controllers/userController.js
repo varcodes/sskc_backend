@@ -266,8 +266,6 @@ const paymentRazorpay = async (req, res) => {
   }
 };
 
-const CryptoJS = require("crypto-js");
-
 // API to verify payment of razorpay
 const verifyRazorpay = async (req, res) => {
   try {
