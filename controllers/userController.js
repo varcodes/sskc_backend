@@ -266,21 +266,39 @@ const paymentRazorpay = async (req, res) => {
 };
 
 // API to verify payment of razorpay
+
+const crypto = require("crypto");
+
 const verifyRazorpay = async (req, res) => {
   try {
-    const { razorpay_order_id } = req.body;
-    const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+      req.body;
 
-    if (orderInfo.status === "paid") {
-      await appointmentModel.findByIdAndUpdate(orderInfo.receipt, {
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(body)
+      .digest("hex");
+
+    const isValid = expectedSignature === razorpay_signature;
+
+    if (isValid) {
+      await appointmentModel.findByIdAndUpdate(razorpay_order_id, {
         payment: true,
       });
-      res.json({ success: true, message: "Payment Successful" });
+
+      return res.json({
+        success: true,
+        message: "Payment verified successfully",
+      });
     } else {
-      res.json({ success: false, message: "Payment Failed" });
+      return res.json({
+        success: false,
+        message: "Invalid signature. Payment failed",
+      });
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.json({ success: false, message: error.message });
   }
 };
