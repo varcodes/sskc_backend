@@ -7,8 +7,7 @@ import appointmentModel from "../models/appointmentModel.js";
 import { v2 as cloudinary } from "cloudinary";
 import stripe from "stripe";
 import razorpay from "razorpay";
-
-const crypto = require("crypto");
+import CryptoJS from "crypto-js";
 
 // Gateway Initialize
 const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);
@@ -267,22 +266,26 @@ const paymentRazorpay = async (req, res) => {
   }
 };
 
-// API to verify payment of razorpay
+const CryptoJS = require("crypto-js");
 
+// API to verify payment of razorpay
 const verifyRazorpay = async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
       req.body;
 
     const body = razorpay_order_id + "|" + razorpay_payment_id;
-    const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(body)
-      .digest("hex");
+
+    // Create the expected signature using CryptoJS
+    const expectedSignature = CryptoJS.HmacSHA256(
+      body,
+      process.env.RAZORPAY_KEY_SECRET
+    ).toString(CryptoJS.enc.Hex);
 
     const isValid = expectedSignature === razorpay_signature;
 
     if (isValid) {
+      // Update payment status in the database
       await appointmentModel.findByIdAndUpdate(razorpay_order_id, {
         payment: true,
       });
