@@ -22,6 +22,7 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
       "https://sskcprofessionals.com",
+      "https://admin.sskcprofessionals.com",
     ],
     credentials: true,
   })
