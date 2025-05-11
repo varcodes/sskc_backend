@@ -8,6 +8,8 @@ import { v2 as cloudinary } from "cloudinary";
 import stripe from "stripe";
 import razorpay from "razorpay";
 
+const crypto = require("crypto");
+
 // Gateway Initialize
 const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);
 const razorpayInstance = new razorpay({
@@ -266,8 +268,6 @@ const paymentRazorpay = async (req, res) => {
 };
 
 // API to verify payment of razorpay
-
-const crypto = require("crypto");
 
 const verifyRazorpay = async (req, res) => {
   try {
